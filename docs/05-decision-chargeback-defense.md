@@ -41,34 +41,34 @@ Two tables — `credit_package_refund_policies` and `appointment_type_refund_pol
 
 ```mermaid
 flowchart LR
-    subgraph Purchase["🛒 At purchase"]
-        P1[User views pricing page] --> P2[Policy shown inline]
-        P2 --> P3[User clicks 'Pay']
-        P3 --> P4[(payment_consents<br/>IP · UA · policy version · timestamp)]
+    subgraph Purchase
+        P1[User views pricing] --> P2[Policy shown inline]
+        P2 --> P3[User clicks Pay]
+        P3 --> P4[(payment_consents<br>IP · UA · policy · timestamp)]
     end
 
-    subgraph Receipt["📧 At receipt"]
-        R1[Stripe/PayPal webhook fires] --> R2[Receipt email sent]
-        R2 --> R3[Auto-inject:<br/>• 'Charged on [timestamp]'<br/>• Policy row<br/>• Support callout]
-        R3 --> R4[(email_log<br/>full HTML snapshot)]
+    subgraph Receipt
+        R1[Payment webhook fires] --> R2[Receipt email sent]
+        R2 --> R3[Auto-inject: timestamp<br>policy row + support callout]
+        R3 --> R4[(email_log<br>HTML snapshot)]
     end
 
-    subgraph Dispute["⚖️ If dispute filed"]
+    subgraph Dispute
         D1[Processor dispute webhook] --> D2[Create chargeback_case]
-        D2 --> D3[Bundle evidence:<br/>consent row + email snapshot +<br/>support transcript + reading record]
-        D3 --> D4[Submit to processor<br/>within 7 days]
+        D2 --> D3[Bundle evidence:<br>consent + email + transcript]
+        D3 --> D4[Submit within 7 days]
         D4 --> D5{Outcome}
-        D5 -->|~60%+ wins| Won([Dispute won])
-        D5 -->|~40% lost| Lost([Dispute lost])
+        D5 -->|60% wins| Won([Dispute won])
+        D5 -->|40% lost| Lost([Dispute lost])
     end
 
     P4 -.-> D3
     R4 -.-> D3
 
-    style Won fill:#3FCF8E40,stroke:#3FCF8E,color:#F5F0E6
-    style Lost fill:#FF444430,stroke:#FF4444,color:#F5F0E6
-    style P4 fill:#6E56CF20,stroke:#6E56CF,color:#F5F0E6
-    style R4 fill:#C8A96920,stroke:#C8A969,color:#F5F0E6
+    style Won fill:#3FCF8E,stroke:#1F8F5F,color:#000
+    style Lost fill:#FF8888,stroke:#CC4444,color:#000
+    style P4 fill:#C4B8F0,stroke:#412991,color:#000
+    style R4 fill:#F5D789,stroke:#8F7744,color:#000
 ```
 
 The key insight: **evidence must exist at the moment of purchase**, not assembled after a dispute opens. Every link in this chain is built to be an evidentiary artifact.

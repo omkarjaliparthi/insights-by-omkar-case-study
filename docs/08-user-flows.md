@@ -4,36 +4,36 @@ The happy paths and the recovery paths — how real users move through the produ
 
 ---
 
-## 1. First-time user: signup → first reading → purchase
+## 1. First-time user: signup to first reading to purchase
 
-The acquisition-to-activation-to-monetization journey.
+The acquisition → activation → monetization journey.
 
 ```mermaid
 flowchart TD
-    Land([Land on site<br/>via organic / social]) --> Guest{Signed in?}
-    Guest -- No --> FreeCard["Free daily card / hook reading<br/>(no signup required)"]
+    Land([Land on site]) --> Guest{Signed in?}
+    Guest -- No --> FreeCard[Free daily card reading<br>no signup required]
     FreeCard --> Value{Found value?}
-    Value -- No --> Exit([Exit — GA event<br/>tracked for funnel analysis])
-    Value -- Yes --> Signup["Signup prompt<br/>email / social"]
-    Signup --> Verify["Email verification"]
-    Verify --> FirstReading["First full reading<br/>(3 free credits granted)"]
-    FirstReading --> Artifact["Reading saved to library<br/>unique OG image generated"]
-    Artifact --> Hit{Hit paywall?<br/>(credits exhausted)}
-    Hit -- No --> Loop([Loop: more readings])
-    Hit -- Yes --> Pricing["Pricing page<br/>(4 tiers + credit packs)"]
-    Pricing --> Policy["Consent row captured<br/>policy version + IP + UA"]
-    Policy --> Checkout{Chosen rail?}
-    Checkout -- Stripe --> StripeFlow["Stripe Checkout"]
-    Checkout -- PayPal --> PayPalFlow["PayPal Checkout"]
-    StripeFlow --> Webhook["Webhook signature verified<br/>credits provisioned"]
+    Value -- No --> Exit([Exit - GA event tracked])
+    Value -- Yes --> Signup[Signup prompt]
+    Signup --> Verify[Email verification]
+    Verify --> FirstReading[First full reading<br>3 free credits granted]
+    FirstReading --> Artifact[Reading saved to library<br>unique OG image generated]
+    Artifact --> Hit{Hit paywall?}
+    Hit -- No --> Loop([Loop - more readings])
+    Hit -- Yes --> Pricing[Pricing page<br>4 tiers + credit packs]
+    Pricing --> Policy[Consent row captured<br>policy version + IP + UA]
+    Policy --> Checkout{Which rail?}
+    Checkout -- Stripe --> StripeFlow[Stripe Checkout]
+    Checkout -- PayPal --> PayPalFlow[PayPal Checkout]
+    StripeFlow --> Webhook[Webhook verified<br>credits provisioned]
     PayPalFlow --> Webhook
-    Webhook --> Receipt["Receipt email<br/>evidence-stamped"]
-    Receipt --> Active([Active paying user<br/>→ retention flows])
+    Webhook --> Receipt[Receipt email<br>evidence-stamped]
+    Receipt --> Active([Active paying user])
 
-    style Exit fill:#FF444430,color:#F5F0E6
-    style Active fill:#3FCF8E40,color:#F5F0E6
-    style Policy fill:#6E56CF30,color:#F5F0E6
-    style Webhook fill:#C8A96930,color:#F5F0E6
+    style Exit fill:#FF8888,color:#000
+    style Active fill:#3FCF8E,color:#000
+    style Policy fill:#C4B8F0,color:#000
+    style Webhook fill:#F5D789,color:#000
 ```
 
 **Design principles baked in:**
@@ -53,35 +53,35 @@ sequenceDiagram
     actor User
     participant UI as Chat Widget
     participant Router as Agent Router
-    participant T1 as Tier-1 Agent<br/>(Maya / Sofia / ...)
-    participant T2 as Tier-2 Agent<br/>(Nadia — Anthropic)
+    participant T1 as Tier-1 Agent
+    participant T2 as Nadia Tier-2
     participant DB as Supabase
 
     User->>UI: Opens chat
     UI->>Router: Load session
     Router->>DB: Read escalated_to_agent
-    DB-->>Router: null (not escalated)
-    Router->>T1: Route via hash(user_id, week)
-    T1-->>User: "Hi, I'm Maya — how can I help?"
+    DB-->>Router: null - not escalated
+    Router->>T1: Route via hash
+    T1-->>User: Hi, I am Maya. How can I help?
 
     User->>T1: Question
     T1-->>User: Response 1
 
     User->>T1: Still not clear
-    T1-->>User: Response 2 (pushback: 1)
+    T1-->>User: Response 2 (pushback 1)
 
-    User->>T1: This isn't helping
-    T1-->>User: Response 3 (pushback: 2)
+    User->>T1: This is not helping
+    T1-->>User: Response 3 (pushback 2)
 
     User->>T1: I want a human
-    Note over Router: pushback: 3 — escalate
-    Router->>DB: Set escalated_to_agent = nadia
-    Router->>UI: Event: "Connecting to senior agent..."
-    Router->>T2: Route + full context
-    T2-->>User: "Hi, I'm Nadia — let me help with this."
+    Note over Router: pushback 3 - escalate
+    Router->>DB: Set escalated_to_agent to nadia
+    Router->>UI: Event - connecting to senior agent
+    Router->>T2: Route with full context
+    T2-->>User: Hi, I am Nadia. Let me help.
 
     User->>T2: Continue conversation
-    Note over Router,DB: All future messages route to T2<br/>escalated_to_agent persisted correctly
+    Note over Router,DB: Future messages stay with T2
 ```
 
 **Why it matters:**
@@ -98,33 +98,33 @@ What happens when a user wants their money back — and how we stay off processo
 
 ```mermaid
 flowchart TD
-    Unhappy([User regrets purchase]) --> Channel{How do they<br/>reach out?}
+    Unhappy([User regrets purchase]) --> Channel{How reached out?}
 
-    Channel -- "Opens support chat<br/>(low friction)" --> Support["Tier-1 or Tier-2 agent<br/>with full purchase context"]
-    Support --> Policy["Apply per-product refund policy<br/>(cancellation window, fee rules)"]
-    Policy --> Eligible{Refund<br/>eligible?}
-    Eligible -- Yes --> Refund["Process refund<br/>via Stripe / PayPal API"]
-    Refund --> Resolved([Refund issued<br/>credits clawed back])
-    Eligible -- No --> Explain["Explain policy<br/>offer partial / alternative"]
-    Explain --> UserAccepts{User<br/>accepts?}
+    Channel -- Opens support chat --> Support[Tier-1 or Tier-2 agent<br>with full purchase context]
+    Channel -- Emails support --> Support
+    Channel -- Files bank dispute --> FileDispute[Processor dispute opens]
+
+    Support --> Policy[Apply refund policy]
+    Policy --> Eligible{Refund eligible?}
+    Eligible -- Yes --> Refund[Process refund via API]
+    Refund --> Resolved([Refund issued<br>credits clawed back])
+    Eligible -- No --> Explain[Explain policy<br>offer partial or alternative]
+    Explain --> UserAccepts{User accepts?}
     UserAccepts -- Yes --> Resolved
     UserAccepts -- No --> FileDispute
 
-    Channel -- "Emails support<br/>(via receipt callout)" --> Support
-
-    Channel -- "Skips support<br/>files bank dispute" --> FileDispute["Processor dispute opens"]
-    FileDispute --> Webhook["Dispute webhook fires<br/>chargeback_case created"]
-    Webhook --> Evidence["Assemble evidence bundle<br/>• payment_consents row<br/>• email_log HTML snapshot<br/>• support transcript<br/>• reading records"]
-    Evidence --> Submit["Submit to processor<br/>within 7 days"]
+    FileDispute --> Webhook[Dispute webhook fires<br>chargeback_case created]
+    Webhook --> Evidence[Bundle evidence:<br>consent + email + transcript + reading]
+    Evidence --> Submit[Submit within 7 days]
     Submit --> Outcome{Outcome}
-    Outcome -- Won --> Won([Dispute won<br/>~60%+ rate])
-    Outcome -- Lost --> Lost([Dispute lost<br/>+ fee charged<br/>→ investigate gap in evidence])
+    Outcome -- Won --> Won([Dispute won - 60% rate])
+    Outcome -- Lost --> Lost([Dispute lost + fee])
 
-    style Resolved fill:#3FCF8E40,color:#F5F0E6
-    style Won fill:#3FCF8E40,color:#F5F0E6
-    style Lost fill:#FF444430,color:#F5F0E6
-    style FileDispute fill:#FF444420,color:#F5F0E6
-    style Support fill:#6E56CF30,color:#F5F0E6
+    style Resolved fill:#3FCF8E,color:#000
+    style Won fill:#3FCF8E,color:#000
+    style Lost fill:#FF8888,color:#000
+    style FileDispute fill:#FFB366,color:#000
+    style Support fill:#C4B8F0,color:#000
 ```
 
 **The most important design decision:** the **receipt callout** ("Questions about this charge?") routes unhappy users into support *before* they reach for a chargeback. That single step converts a ~$30 lost revenue event (refund) into a preserved relationship, or at worst a $15 fee event (lost dispute) into a $0 refund event.
@@ -139,36 +139,25 @@ How the content side of the platform operates autonomously via crons.
 
 ```mermaid
 flowchart LR
-    subgraph Daily["Daily cycle"]
-        direction TB
-        Gen["06:00 UTC<br/>content-generate cron"]
-        Gen --> Brainstorm[("content_pipeline<br/>drafts created")]
-        Brainstorm --> Review{Admin<br/>review needed?}
-        Review -- No --> Auto["Auto-approve<br/>(trusted templates)"]
-        Review -- Yes --> Queue["Admin queue<br/>approval workflow"]
-        Queue --> Approve[Admin approves or edits]
-        Auto --> Publish
-        Approve --> Publish
-        Publish["14:00 UTC<br/>content-publish cron"]
-        Publish --> Live[Live on /blog, /rituals, etc.]
-        Live --> Ping["Ping IndexNow + GSC<br/>sitemap updated"]
-    end
+    Gen[06:00 UTC<br>content-generate cron] --> Brainstorm[(content_pipeline<br>drafts created)]
+    Brainstorm --> Review{Admin review needed?}
+    Review -- No --> Auto[Auto-approve<br>trusted templates]
+    Review -- Yes --> Queue[Admin queue<br>approval workflow]
+    Queue --> Approve[Admin approves or edits]
+    Auto --> Publish
+    Approve --> Publish[14:00 UTC<br>content-publish cron]
+    Publish --> Live[Live on blog and rituals]
+    Live --> Ping[Ping IndexNow and GSC<br>sitemap updated]
 
-    subgraph Weekly["Weekly"]
-        Intel["Mon 08:00 UTC<br/>intelligence cron"]
-        Intel --> Signals["Aggregate signals<br/>(brainstorms, performance,<br/>search trends)"]
-        Signals --> Roadmap[Next-week roadmap generated]
-    end
+    Intel[Mon 08:00 UTC<br>intelligence cron] --> Signals[Aggregate signals]
+    Signals --> Roadmap[Next-week roadmap generated]
 
-    subgraph Monthly["Monthly"]
-        Report["15th 10:00 UTC<br/>monthly-report cron"]
-        Report --> Email[Email to admin]
-    end
+    Report[15th 10:00 UTC<br>monthly-report cron] --> Email[Email to admin]
 
-    style Gen fill:#C8A96930,color:#F5F0E6
-    style Publish fill:#C8A96930,color:#F5F0E6
-    style Intel fill:#6E56CF30,color:#F5F0E6
-    style Report fill:#3FCF8E30,color:#F5F0E6
+    style Gen fill:#F5D789,color:#000
+    style Publish fill:#F5D789,color:#000
+    style Intel fill:#C4B8F0,color:#000
+    style Report fill:#3FCF8E,color:#000
 ```
 
 ---
@@ -187,5 +176,5 @@ A PM who can think in these four layers simultaneously is rare. This is what the
 ---
 
 <p align="center">
-  ← <a href="./07-outcomes-and-lessons.md">Outcomes & Lessons</a> · <a href="../README.md">Back to overview</a>
+  <a href="./07-outcomes-and-lessons.md">← Outcomes and Lessons</a> · <a href="../README.md">Back to overview</a>
 </p>

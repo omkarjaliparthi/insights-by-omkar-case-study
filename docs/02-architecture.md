@@ -5,40 +5,30 @@
 ```mermaid
 flowchart TB
     User([User / Browser])
+    Next[Next.js 16 App Router<br>React 19 · TypeScript · Tailwind]
 
-    subgraph Client["Client Layer"]
-        direction LR
-        Next["Next.js 16 App Router<br/>React 19 · TypeScript · Tailwind"]
+    subgraph Server [Server Layer · Vercel]
+        RSC[Server Components<br>+ Server Actions]
+        API[API Routes<br>webhooks · crons · admin]
     end
 
-    subgraph Server["Server Layer (Vercel Edge + Node)"]
-        direction LR
-        RSC["Server Components<br/>+ Server Actions"]
-        API["API Routes<br/>(webhooks, crons, admin)"]
+    SB[(Supabase<br>Auth · Postgres · RLS)]
+
+    subgraph AI [AI Orchestration]
+        OAI[OpenAI<br>per-module models]
+        ANT[Anthropic Claude<br>Tier-2 support]
     end
 
-    subgraph Data["Data & Identity"]
-        SB[("Supabase<br/>Auth · Postgres · Storage<br/>Row-Level Security")]
+    subgraph Pay [Payment Rails]
+        ST[Stripe]
+        PP[PayPal]
     end
 
-    subgraph AI["AI Orchestration"]
-        OAI["OpenAI<br/>(per-module models)"]
-        ANT["Anthropic Claude<br/>(Tier-2 support)"]
-    end
+    RS[Resend<br>SPF · DKIM · DMARC]
 
-    subgraph Pay["Payment Rails"]
-        ST["Stripe<br/>Subscriptions + Credits"]
-        PP["PayPal<br/>Subscriptions + Orders"]
-    end
-
-    subgraph Comm["Email & Comms"]
-        RS["Resend<br/>SPF · DKIM · DMARC<br/>Inbound routing"]
-    end
-
-    subgraph Ops["Ops & Observability"]
-        direction LR
-        CRN["5× Vercel Crons<br/>content · intelligence<br/>reports · re-engagement"]
-        SEN["Sentry · GA4<br/>GSC · IndexNow"]
+    subgraph Ops [Ops and Observability]
+        CRN[5 Vercel Crons]
+        SEN[Sentry · GA4 · GSC]
     end
 
     User <--> Next
@@ -55,22 +45,6 @@ flowchart TB
     PP -. webhooks .-> API
     CRN --> API
     API --> SEN
-
-    classDef client fill:#6E56CF20,stroke:#6E56CF,color:#F5F0E6
-    classDef server fill:#C8A96920,stroke:#C8A969,color:#F5F0E6
-    classDef data fill:#3FCF8E20,stroke:#3FCF8E,color:#F5F0E6
-    classDef ai fill:#41299120,stroke:#412991,color:#F5F0E6
-    classDef pay fill:#635BFF20,stroke:#635BFF,color:#F5F0E6
-    classDef comm fill:#FFCB1F20,stroke:#FFCB1F,color:#F5F0E6
-    classDef ops fill:#FF444420,stroke:#FF4444,color:#F5F0E6
-
-    class Next client
-    class RSC,API server
-    class SB data
-    class OAI,ANT ai
-    class ST,PP pay
-    class RS comm
-    class CRN,SEN ops
 ```
 
 ---
@@ -105,11 +79,11 @@ erDiagram
     PROFILES ||--o{ EMAIL_LOG : receives
 
     CHAT_SESSIONS ||--o{ CHAT_MESSAGES : contains
-    CHAT_SESSIONS }o--|| SUPPORT_AGENTS : "assigned (T1 or T2)"
+    CHAT_SESSIONS }o--|| SUPPORT_AGENTS : assigned
 
-    SUBSCRIPTIONS }o--|| STRIPE_OR_PAYPAL : "provider"
-    PAYMENT_CONSENTS }o--|| REFUND_POLICIES : "stamped with"
-    CHARGEBACK_CASES ||--|| EMAIL_LOG : "evidence from"
+    SUBSCRIPTIONS }o--|| PAYMENT_PROVIDER : uses
+    PAYMENT_CONSENTS }o--|| REFUND_POLICIES : stamped
+    CHARGEBACK_CASES ||--o{ EMAIL_LOG : references
 
     PROFILES {
         uuid id PK

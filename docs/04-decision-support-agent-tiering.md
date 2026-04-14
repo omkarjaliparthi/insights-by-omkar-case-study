@@ -35,49 +35,49 @@ Escalation is **in-place** — same chat thread, soft UI transition (`"Connectin
 
 ```mermaid
 flowchart TD
-    Msg([User sends message]) --> SessionLoad["Load session state<br/>(escalated_to_agent)"]
-    SessionLoad --> EscCheck{Already<br/>escalated?}
-    EscCheck -- Yes --> Nadia["Route → Nadia (Tier-2)<br/>Anthropic Claude"]
-    EscCheck -- No --> PushbackCount["Count pushback signals<br/>in this session"]
-    PushbackCount --> ShouldEsc{Pushback<br/>count ≥ 3?}
-    ShouldEsc -- Yes --> EscEvent["Emit escalation event<br/>UI: 'Connecting to senior agent...'"]
-    EscEvent --> Persist["Persist escalated_to_agent<br/>on session AND every future message"]
+    Msg([User sends message]) --> SessionLoad[Load session state]
+    SessionLoad --> EscCheck{Already escalated?}
+    EscCheck -- Yes --> Nadia[Route to Nadia Tier-2<br>Anthropic Claude]
+    EscCheck -- No --> PushbackCount[Count pushback signals]
+    PushbackCount --> ShouldEsc{Pushback count >= 3?}
+    ShouldEsc -- Yes --> EscEvent[Emit escalation event<br>UI: Connecting to senior agent]
+    EscEvent --> Persist[Persist escalated_to_agent<br>on session and all future messages]
     Persist --> Nadia
-    ShouldEsc -- No --> Hash["Deterministic hash<br/>(user_id, week)"]
-    Hash --> Pick["Pick Tier-1 agent<br/>(Maya / Sofia / Priya /<br/>Zara / Leila / Cleo)"]
-    Pick --> Tier1["Route → Selected Tier-1<br/>OpenAI GPT-4 class"]
-    Tier1 --> Reply([Response + log to chat_messages])
+    ShouldEsc -- No --> Hash[Deterministic hash<br>user_id + week]
+    Hash --> Pick[Pick Tier-1 agent<br>Maya Sofia Priya<br>Zara Leila Cleo]
+    Pick --> Tier1[Route to Selected Tier-1<br>OpenAI GPT-4 class]
+    Tier1 --> Reply([Response + log])
     Nadia --> Reply
 
-    style Nadia fill:#D9770640,stroke:#D97706,stroke-width:2px,color:#F5F0E6
-    style Tier1 fill:#41299140,stroke:#412991,stroke-width:2px,color:#F5F0E6
-    style EscEvent fill:#FF444430,stroke:#FF4444,color:#F5F0E6
+    style Nadia fill:#FFB366,stroke:#D97706,stroke-width:2px,color:#000
+    style Tier1 fill:#A89CE8,stroke:#412991,stroke-width:2px,color:#000
+    style EscEvent fill:#FF8888,stroke:#FF4444,color:#000
 ```
 
 ### Weekly rotation across users
 
 ```mermaid
 flowchart LR
-    subgraph Week1["Week 1"]
+    subgraph Week_1
         U1a[User A] --> M1[Maya]
         U2a[User B] --> S1[Sofia]
         U3a[User C] --> P1[Priya]
     end
 
-    subgraph Week2["Week 2"]
+    subgraph Week_2
         U1b[User A] --> Z2[Zara]
         U2b[User B] --> L2[Leila]
         U3b[User C] --> C2[Cleo]
     end
 
-    Week1 -.->|hash(user_id, week)| Week2
+    Week_1 -.->|next week<br>hash rotates| Week_2
 
-    style M1 fill:#41299130,color:#F5F0E6
-    style S1 fill:#41299130,color:#F5F0E6
-    style P1 fill:#41299130,color:#F5F0E6
-    style Z2 fill:#6E56CF30,color:#F5F0E6
-    style L2 fill:#6E56CF30,color:#F5F0E6
-    style C2 fill:#6E56CF30,color:#F5F0E6
+    style M1 fill:#C4B8F0,color:#000
+    style S1 fill:#C4B8F0,color:#000
+    style P1 fill:#C4B8F0,color:#000
+    style Z2 fill:#E0D4FF,color:#000
+    style L2 fill:#E0D4FF,color:#000
+    style C2 fill:#E0D4FF,color:#000
 ```
 
 Same user = same agent all week (session continuity). New week = freshness. Across users at any moment = load distribution.
