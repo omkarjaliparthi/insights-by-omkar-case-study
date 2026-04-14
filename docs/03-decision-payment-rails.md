@@ -1,11 +1,11 @@
-# 03 · Decision — Dual Payment Rails (Stripe + PayPal)
+# 03 · Decision · Dual Payment Rails
 
 ## Context
 
-At v1.2 (mid-March 2026) I had to pick a payments stack. The product has two revenue paths:
+At v1.2 (mid-March 2026), payments stack decision. Two revenue paths:
 
-- **Subscriptions** — 4 tiers (Lucky Pro Monthly/Annual, Lucky Max Monthly/Annual)
-- **Credit packs + impulse packages** — pay-per-reading, pay-as-you-go
+- **Subscriptions** — 4 tiers (Lucky Pro M/A, Lucky Max M/A)
+- **Credit packs + impulse packages** — pay-per-reading
 
 ## Options considered
 
@@ -47,32 +47,32 @@ flowchart TD
 
 ## Decision
 
-**Ship dual rails — Stripe primary, PayPal secondary.** Highest weighted score, strongest chargeback resilience (which was the gating concern for a high-emotion consumer category).
+**Dual rails — Stripe primary, PayPal secondary.** Highest weighted score. Strongest chargeback resilience, which was the gating concern.
 
 ## Rationale
 
-1. **Trust surface.** Spiritual/wellness content attracts skeptical buyers — especially older demographics who have existing PayPal accounts but won't enter card details on a new site. Offering PayPal at checkout measurably lowers friction.
-2. **Chargeback surface.** High-emotion purchases (spiritual readings) have elevated buyer's-remorse chargeback risk. Splitting rails means no single processor's risk model can kill the business. If Stripe puts the account under review, PayPal keeps revenue flowing and vice-versa.
-3. **Unit economics still work.** Fee differential (Stripe ~2.9%+30¢ vs PayPal ~3.49%+49¢) is small relative to the cost of a lost customer at checkout.
+1. **Trust surface.** Skeptical buyers — especially older demographics — have PayPal accounts and won't enter card details on new sites. PayPal at checkout measurably lowers friction.
+2. **Processor redundancy.** High-emotion purchases carry elevated dispute risk. One processor can't kill the business. If Stripe freezes for review, PayPal keeps revenue flowing.
+3. **Unit economics hold.** Fee differential (Stripe 2.9%+30¢ vs PayPal 3.49%+49¢) is small vs. the cost of a lost customer at checkout.
 
-## Trade-offs I accepted
+## Tradeoffs accepted
 
-- **2× webhook surface.** Both `/api/billing/webhook` endpoints need signature verification (`STRIPE_WEBHOOK_SECRET`, `PAYPAL_WEBHOOK_ID`) and idempotency. Documented in the pre-launch checklist.
-- **Reconciliation complexity.** Both providers emit their own IDs (`session.id`, `subscription.id`, `order.id`, `capture.id`). Schema had to abstract `provider_*` columns so the rest of the app doesn't branch on rail.
-- **Subscription lifecycle parity.** PayPal's subscription state machine is less rich than Stripe's. I normalize both into a single internal state (`active | past_due | canceled | refunded | disputed`) for app-level logic.
+- **2× webhook surface.** Both endpoints need signature verification + idempotency. Covered in pre-launch checklist.
+- **Reconciliation complexity.** Different provider IDs. Schema abstracts `provider_*` columns so app code doesn't branch on rail.
+- **State normalization.** PayPal's subscription state machine is thinner than Stripe's. Both map into one internal state (`active | past_due | canceled | refunded | disputed`).
 
-## How I tested it
+## Testing
 
-Before go-live (v1.4.1):
+Pre-launch (v1.4.1):
 
-- Full test-mode loop on both rails: checkout → webhook → credits delta → refund → webhook → credits reversal
-- Chargeback simulation — manually issued a test dispute, confirmed `chargeback_cases` row was created and email was logged with `chargeTimestamp` + policy URL
-- Subscription lifecycle: upgrade, downgrade, cancel in portal → webhook downgrade → confirm UI state
+- Full test loop both rails: checkout → webhook → credits delta → refund → reversal
+- Dispute simulation — test chargeback, verified `chargeback_cases` row + evidence-stamped email logged
+- Subscription lifecycle: upgrade, downgrade, cancel → webhook → UI state
 
-## What I'd do differently
+## Would change
 
-- Built rail-abstraction earlier. I put Stripe in at v1.2 and added PayPal at v2.0, which meant retrofitting some payment-flow code. Cleaner would've been to define the `PaymentProvider` interface at v1.0 and wire both in from day one.
+Build `PaymentProvider` abstraction at v1.0 even with only Stripe implemented. Retrofitting at v2.0 cost ~1.5 days.
 
 ---
 
-**Referenced artifacts:** `payment_consents`, `chargeback_cases`, `STRIPE_WEBHOOK_SECRET`, `PAYPAL_WEBHOOK_ID` (see [pre-launch checklist](./06-operating-rhythm.md#pre-launch-checklist)).
+*Artifacts referenced:* `payment_consents` · `chargeback_cases` · `STRIPE_WEBHOOK_SECRET` · `PAYPAL_WEBHOOK_ID`. See [pre-launch checklist](./06-operating-rhythm.md#pre-launch-checklist).

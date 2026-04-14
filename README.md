@@ -1,28 +1,28 @@
-<h1 align="center">Insights by Omkar — Case Study</h1>
+<h1 align="center">Insights by Omkar · Case Study</h1>
 
 <p align="center">
-  <b>How I shipped a production AI SaaS, solo, in 6 weeks.</b><br/>
-  <i>Product, program, engineering, and compliance — end to end.</i>
+  <b>A production AI SaaS — shipped solo, in 6 weeks.</b><br/>
+  <i>Product, program, engineering, compliance — end to end.</i>
 </p>
 
 <p align="center">
   <a href="https://www.insightsbyomkar.com"><img src="https://img.shields.io/badge/Live_Product-insightsbyomkar.com-181717?style=for-the-badge" /></a>
   <img src="https://img.shields.io/badge/Built_by-Omkar_Jaliparthi-6E56CF?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Timeline-6_weeks-success?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Ship-6_weeks-success?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Status-Live_with_paying_users-brightgreen?style=for-the-badge" />
 </p>
 
 <p align="center">
-  <i>This repo is a <b>public case study</b>. The production code lives in a <b>private</b> repo — shared here is architecture, decisions, and operating playbooks, with no proprietary code.</i>
+  <i>Public case study. Production code private. What's shared: architecture, decisions, operating playbooks — no proprietary code.</i>
 </p>
 
 ---
 
 ## TL;DR
 
-I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** — a production AI SaaS platform — in **~6 weeks, solo**, under my LLC (**Omkar's Holistic Services LLC**, formed May 2023, DBA *Insights by Omkar*). End-to-end: product strategy, UX, full-stack engineering, payments, AI integration, email infrastructure, support operations, compliance, and launch.
+Built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** — a production AI SaaS — in **6 weeks, solo**, under **Omkar's Holistic Services LLC** (formed May 2023, DBA *Insights by Omkar*). End to end: product, UX, full-stack engineering, payments, AI, email, support, compliance, launch.
 
-**Why it matters for a PM/TPM role:** most candidates can talk about one layer of a product. This project is evidence I can own *all* of them — and that I know which layer to invest in based on business stage and risk.
+Most PM/TPM candidates own one layer. This project evidences all four — and the judgment to know which layer to invest in at each stage.
 
 ---
 
@@ -30,28 +30,28 @@ I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** 
 
 | | |
 |---|---|
-| **Product** | AI-powered spiritual insights platform — tarot, spells, runes, dreams, numerology, and 7+ other modules |
-| **Timeline** | v0.01 (initial scaffold) → v2.0.7 (production) in ~6 weeks (2026-03-05 → 2026-04-14) |
-| **Release cadence** | 20+ versioned releases, full [CHANGELOG](https://github.com/omkarjaliparthi/insights-by-omkar) |
+| **Product** | AI consumer SaaS · 12+ modules (tarot, spells, runes, dreams, numerology, …) |
+| **Timeline** | v0.01 → v2.0.7 · 6 weeks · 2026-03-05 → 2026-04-14 |
+| **Releases** | 20+ versioned · full [CHANGELOG](https://github.com/omkarjaliparthi/insights-by-omkar) |
 | **Stack** | Next.js 16 · React 19 · Supabase · TypeScript · Tailwind · Vercel |
-| **Payments** | Dual rails — Stripe (live) + PayPal (live), 4-tier subscriptions + credit packs |
-| **AI** | OpenAI + Anthropic, per-module model configuration, structured outputs |
-| **Ops** | 5 Vercel cron jobs · Resend email (SPF/DKIM/DMARC) · Sentry · GSC + IndexNow |
-| **Compliance** | Full RLS, consent logging, chargeback-defense data model, refund policy enforcement |
-| **Surface area** | 30+ DB migrations · 20+ admin panels · 12+ product modules |
+| **Payments** | Stripe + PayPal (both live) · 4 subscription tiers + credit packs |
+| **AI** | OpenAI + Anthropic · per-module models · structured outputs |
+| **Ops** | 5 Vercel crons · Resend (SPF/DKIM/DMARC) · Sentry · GSC · IndexNow |
+| **Compliance** | RLS · consent logging · chargeback defense · enforced refund policy |
+| **Surface** | 30+ DB migrations · 20+ admin panels · 12+ product modules |
 
 ---
 
 ## 📑 Read the case study
 
-1. **[Problem & users](./docs/01-problem-and-users.md)** — why this product exists, who it's for
-2. **[Architecture](./docs/02-architecture.md)** — system design, data model, cron topology
-3. **[Decision: dual payment rails](./docs/03-decision-payment-rails.md)** — why Stripe *and* PayPal
-4. **[Decision: tiered AI support agents](./docs/04-decision-support-agent-tiering.md)** — 6 rotating Tier-1 + auto-escalation
-5. **[Decision: chargeback defense](./docs/05-decision-chargeback-defense.md)** — how the law degree showed up
-6. **[Operating rhythm](./docs/06-operating-rhythm.md)** — release discipline, pre-launch checklist, cron schedules
-7. **[Outcomes & lessons](./docs/07-outcomes-and-lessons.md)** — what worked, what I'd do differently
-8. **[User flows](./docs/08-user-flows.md)** — signup, support escalation, refund/chargeback recovery, content publishing (with diagrams)
+1. **[Problem & users](./docs/01-problem-and-users.md)** — why it exists, who it serves
+2. **[Architecture](./docs/02-architecture.md)** — system, data model, cron topology
+3. **[Decision · payment rails](./docs/03-decision-payment-rails.md)** — Stripe + PayPal, with tradeoff matrix
+4. **[Decision · tiered support agents](./docs/04-decision-support-agent-tiering.md)** — 6 rotating Tier-1 + auto-escalation
+5. **[Decision · chargeback defense](./docs/05-decision-chargeback-defense.md)** — governance as product
+6. **[Operating rhythm](./docs/06-operating-rhythm.md)** — releases, checklists, crons
+7. **[Outcomes & lessons](./docs/07-outcomes-and-lessons.md)** — what worked, what to change
+8. **[User flows](./docs/08-user-flows.md)** — signup, support escalation, refund/chargeback, content automation
 
 ---
 
@@ -108,7 +108,9 @@ I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** 
 
 ## Who I am
 
-**Omkar Jaliparthi** — 8+ years across Project/Program Management, Business Analysis, and full-stack shipping. Founder of **Omkar's Holistic Services LLC** (DBA *Insights by Omkar*) since May 2023. MS CS (Pace University, 2024), LLB (2021), ICWA Intermediate (2020). Based in San Jose, CA. Open to Senior PM, TPM, and Founding PM roles.
+**Omkar Jaliparthi** · Product & Program leader · 8+ years across PM, BA, and full-stack shipping.
+Founder of **Omkar's Holistic Services LLC** (DBA *Insights by Omkar*) since May 2023.
+MS CS · LLB · ICWA Intermediate · San Jose, CA · Open to Senior PM / TPM / Founding PM.
 
 <p>
   <a href="https://github.com/omkarjaliparthi">GitHub</a> ·

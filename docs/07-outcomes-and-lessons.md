@@ -1,29 +1,29 @@
 # 07 · Outcomes & Lessons
 
-## What I shipped
+## Shipped
 
-In **~6 weeks, solo**, I delivered:
+In **6 weeks, solo**:
 
-- A **live, production-grade AI SaaS** at [insightsbyomkar.com](https://www.insightsbyomkar.com)
-- **12+ product modules** spanning structured AI outputs, each with its own schema + cost model
-- **Dual payment rails** (Stripe + PayPal) with webhook reconciliation and chargeback-case modeling
-- **Multi-tier AI support system** (6 rotating Tier-1 + Anthropic-powered Tier-2 escalation)
-- **30+ DB migrations** with Row-Level Security on every user-scoped table
-- **5 scheduled cron jobs** for content, intelligence, reports, re-engagement
-- **8 branded email templates** with evidence-stamping for chargeback defense
-- **20+ admin panels** for ops, content intelligence, support, observability
-- A full **pre-launch checklist** (13 sections) and **versioned CHANGELOG** discipline
+- Live, production-grade AI SaaS at [insightsbyomkar.com](https://www.insightsbyomkar.com)
+- 12+ product modules · structured AI outputs · per-module schema + cost model
+- Dual payment rails (Stripe + PayPal) with webhook reconciliation + chargeback case modeling
+- Multi-tier AI support (6 rotating Tier-1 + Anthropic Tier-2)
+- 30+ DB migrations · RLS on every user-scoped table
+- 5 scheduled cron jobs · content, intelligence, reports, re-engagement
+- 8 branded email templates with evidence-stamping
+- 20+ admin panels · ops, content intelligence, support, observability
+- 13-section pre-launch checklist · versioned CHANGELOG discipline
 
 ## What this evidences
 
-I don't just manage shipping — I do the shipping when needed. I can:
+I don't just manage shipping — I do the shipping when needed:
 
-- **Strategize like a PM** — segment users, price the product, decide what to cut
-- **Execute like a TPM** — sequence releases, track dependencies, gate launches
-- **Build like an engineer** — ship production-ready code across the stack
-- **Think like legal/finance** — chargeback defense, unit economics, compliance posture
+- **Strategize like a PM** — segment, price, decide what to cut
+- **Execute like a TPM** — sequence, track, gate
+- **Build like an engineer** — production-ready code across the stack
+- **Think like legal/finance** — chargeback defense, unit economics, compliance
 
-That combination is what makes this case study worth reading: most senior PM/TPM candidates can do one or two of these. I did all four, concurrently, on a commercial deadline.
+Most senior PM/TPM candidates do one or two. This project does all four, concurrently, on a commercial deadline.
 
 ---
 
@@ -31,62 +31,62 @@ That combination is what makes this case study worth reading: most senior PM/TPM
 
 ### 1. Ruthless scoping
 
-I wrote a "not doing at launch" list on day one and held to it:
+Wrote a "not doing at launch" list on day one and held it:
 - No mobile app
 - No social features
-- No custom ML models
-- No more than 5 modules at v1.0
+- No custom models
+- ≤5 modules at v1.0
 
-Every "no" freed up the "yes" list to actually ship. The 12-module product today exists only because the v1.0 product was 5 modules.
+Every "no" funded the "yes" list. The 12-module product today exists because v1.0 was 5 modules.
 
-### 2. Compliance as a product decision, not a legal one
+### 2. Compliance as product, not legal
 
-Chargeback defense, consent logging, RLS, refund policy enforcement — I treated these as **product requirements**, designed into the data model and UX, not bolted on after legal review. Result: the product is audit-ready on day 1 without blocking velocity.
+Chargeback defense, consent, RLS, refund policy enforcement — designed as product requirements into data model and UX. Not bolted on post-legal review. Audit-ready day 1 without blocking velocity.
 
 ### 3. Versioned releases, always
 
-Every change got a version. Every version got a changelog entry. 6 weeks in, I can still answer "when did we ship X?" in 10 seconds. That's operational leverage.
+Every change tagged. Every tag in the changelog. Six weeks in, "when did we ship X?" is a 10-second answer. That's operational leverage.
 
 ### 4. AI-native operating model
 
-I used AI coding tools aggressively — not as a shortcut, but as an amplifier. The `update-ai-context.sh` + `repomix-output.xml` pattern kept the full codebase compressible and queryable. A solo dev with AI can legitimately outpace a 5-person team *if* they keep the context tight.
+AI coding tools used as amplifiers, not shortcuts. `update-ai-context.sh` + `repomix-output.xml` kept the codebase compressible and queryable. A solo dev with AI can outpace a 5-person team — if context stays tight.
 
 ---
 
-## What I'd do differently
+## What I'd change
 
-### 1. Define payment-provider abstraction at v1.0
+### 1. Payment-provider abstraction at v1.0
 
-I added Stripe at v1.2 and PayPal at v2.0, which meant retrofitting rail-aware logic into a bunch of handlers. Cleaner would've been a `PaymentProvider` interface from day one — even if PayPal didn't exist yet, Stripe-only code would've been provider-agnostic.
+Added Stripe at v1.2, PayPal at v2.0. Retrofitting rail-aware logic cost ~1.5 days. Cleaner: `PaymentProvider` interface from day one.
 
-### 2. Add a staging smoke-test suite earlier
+### 2. Staging smoke tests earlier
 
-The support-agent escalation bug (v2.0.7) would've been caught by a 2-message staging test. I was doing manual smoke tests against production — works at this scale, doesn't scale to a team. Building the test harness at v1.4 (pre-launch) rather than post-incident would've been better practice.
+The v2.0.7 escalation bug was catchable with a 2-message test. I was smoke-testing against production. Works solo, won't scale.
 
-### 3. Instrument the dispute dashboard on day 1
+### 3. Dispute dashboard on day 1
 
-I have `chargeback_cases` modeled, but no live dashboard showing dispute rate, refund rate, per-product trendlines, or threshold alerts. The data's there — the surfacing isn't. That's the first thing I'd build in week 7.
+`chargeback_cases` is modeled. The dashboard isn't. Dispute rate, refund rate, per-product trends, threshold alerts. First item for week 7.
 
-### 4. Pre-dispute "save" flow
+### 4. Pre-dispute save flow
 
-The amber "Questions about this charge?" callout in receipts currently links to email support. Better: route it into an in-product support conversation with full purchase context preloaded, so the user hits a warm resolution path *before* calling their bank. Industry data suggests this converts 30%+ of would-be chargebacks.
-
----
-
-## What this project unlocks next
-
-This repo is a capability proof. The applications from here:
-
-- **Founding PM / Founding TPM at an AI startup** — I've shown I can own a product end-to-end at startup speed
-- **Senior TPM at a consumer AI org** — scale the same discipline across multiple teams
-- **Senior PM for AI monetization / payments / compliance surfaces** — the law + accounting + engineering combo is rare and valuable in regulated consumer AI
-
-I'm not looking for "a PM role." I'm looking for a role where the combination of operator, builder, and governance-thinker all get used. If that sounds like your org, **[let's talk](mailto:Jaliparthiomkar03@gmail.com)**.
+The amber callout links to email support today. Better: in-product support chat with purchase context preloaded. Industry data: 30%+ conversion from would-be chargebacks.
 
 ---
 
-<p align="center"><i>End of case study.</i></p>
+## What this unlocks
+
+This repo is a capability proof. The fits from here:
+
+- **Founding PM / TPM at an AI startup** — end-to-end ownership at startup speed
+- **Senior TPM at a consumer AI org** — scale the discipline across teams
+- **Senior PM for monetization, payments, compliance** — the law + accounting + engineering combo is rare in regulated consumer AI
+
+Not looking for "a PM role." Looking for a role where operator, builder, and governance-thinker all get used.
+
+If that's your org — **[let's talk](mailto:Jaliparthiomkar03@gmail.com)**.
+
+---
 
 <p align="center">
-  ← <a href="./06-operating-rhythm.md">Operating Rhythm</a> · <a href="../README.md">Back to overview</a>
+  <a href="./06-operating-rhythm.md">← Operating Rhythm</a> · <a href="../README.md">Back to overview</a>
 </p>

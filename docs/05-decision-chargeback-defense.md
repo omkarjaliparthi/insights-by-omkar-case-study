@@ -1,41 +1,41 @@
-# 05 · Decision — Chargeback Defense Infrastructure
+# 05 · Decision · Chargeback Defense
 
 ## Context
 
-High-emotion consumer purchases (spiritual readings, subscription impulse buys) have elevated **chargeback rates** — 0.5–1.5% vs ~0.1% for normal e-commerce. Chargebacks are existential for a small business: exceed a processor's threshold (Stripe: 0.75%) and your merchant account is paused or terminated.
+High-emotion consumer purchases carry elevated chargeback rates — 0.5–1.5% vs. ~0.1% for normal e-commerce. Cross a processor's threshold (Stripe: 0.75%) and your merchant account is paused or terminated. Existential.
 
-I knew this going in. My LLB (law) training — contracts, consumer protection, evidentiary burden of proof — shaped the design from v1.0, not as a retrofit.
+LLB training — contracts, consumer protection, evidentiary burden — shaped the design from v1.0, not a retrofit.
 
-## The design
+## Design
 
-### Data model (from `supabase/migrations/...support_agent_chargeback.sql`)
+### Data model
 
-Three tables layer the defense:
+Three tables form the defense layer:
 
 | Table | Purpose |
 |---|---|
-| `payment_consents` | Proof of consent: which pricing page did the user see, what did they accept, when, from what IP/user-agent |
-| `chargeback_cases` | Case tracking: dispute ID, status, evidence bundle, resolution |
-| `email_log` | Every transactional email archived — sender, recipient, template, timestamp, HTML snapshot — as evidence trail |
+| `payment_consents` | Which pricing page, what accepted, when, IP, user-agent |
+| `chargeback_cases` | Dispute ID, status, evidence bundle, resolution |
+| `email_log` | Every transactional email — sender, recipient, template, timestamp, HTML snapshot |
 
-### Payment receipts are evidence artifacts
+### Receipts as evidence artifacts
 
-Every Stripe/PayPal payment-receipt email auto-injects:
+Every Stripe/PayPal receipt auto-injects:
 
-1. **Amber "Questions about this charge?" callout** with support email + policy link — so the user has an obvious non-chargeback escape path
-2. **"Charged on [date/time PDT]"** — timestamped proof of authorization
-3. **Policy row** — for credits: *"Credits are non-refundable once added."* For appointments: *"Full refund >24 hrs · Non-refundable within 24 hrs."*
-4. **Footer legal line** — *"By completing this purchase you agreed to our Refund & Cancellation Policy"* with link to `/legal/refunds`
+1. **Amber "Questions about this charge?" callout** → support email + policy link (non-chargeback escape path)
+2. **"Charged on [timestamp PDT]"** → proof of authorization
+3. **Policy row** → for credits: *"Credits are non-refundable once added."* For appointments: *"Full refund >24 hrs · Non-refundable within 24 hrs."*
+4. **Footer** → *"By completing this purchase you agreed to our Refund & Cancellation Policy"* with link to `/legal/refunds`
 
-This isn't legal theater. When a processor dispute opens, the merchant has ~7 days to submit evidence. Having the receipt archived, timestamped, and policy-stamped **at the moment of purchase** means I can win disputes I would otherwise lose.
+Not legal theater. When a dispute opens, the merchant has 7 days to submit evidence. Receipts archived + timestamped + policy-stamped **at purchase** win disputes that would otherwise lose.
 
-### Refund policy: per-product granularity
+### Per-product refund policies
 
-Two tables — `credit_package_refund_policies` and `appointment_type_refund_policies` — store per-product refund rules. The policy is **referenced, not hard-coded**, so:
+Two tables — `credit_package_refund_policies` and `appointment_type_refund_policies` — store per-product rules. Referenced, not hard-coded:
 
-- Adjusting a policy doesn't require a code deploy
-- Admin panel lets me set cancellation windows, refund percentages, and fees per product
-- The same policy rendered to the user at checkout is what's enforced by the webhook handler
+- Policy changes don't require a code deploy
+- Admin panel sets cancellation windows, refund percentages, fees per product
+- What the user sees at checkout is what the webhook enforces
 
 ### Evidence chain — from purchase to dispute win
 
@@ -71,30 +71,33 @@ flowchart LR
     style R4 fill:#F5D789,stroke:#8F7744,color:#000
 ```
 
-The key insight: **evidence must exist at the moment of purchase**, not assembled after a dispute opens. Every link in this chain is built to be an evidentiary artifact.
+**Key insight:** evidence must exist at purchase, not assembled after dispute. Every link in the chain is built to be evidentiary.
 
-## Why this matters for a PM/TPM audience
+## Why this matters for PM/TPM
 
-Most consumer AI founders treat chargeback defense as an *operational* problem — something you deal with when the first dispute comes in. By then, it's too late: the evidence you needed didn't exist.
+Most founders treat chargeback defense as an operational problem — handled when the first dispute arrives. By then, the evidence you need doesn't exist.
 
-Treating it as a **product problem** means:
+Treat it as a **product problem** and:
 
-- Refund terms are visible at checkout, in receipts, and in-product (no "hidden terms" argument)
-- Every consent is logged with context (IP, UA, timestamp, policy version)
+- Refund terms visible at checkout, in receipts, in-product — no "hidden terms" argument
+- Every consent logged with context (IP, UA, timestamp, policy version)
 - Every email becomes an evidentiary artifact
-- Support agents have access to the full purchase + communication timeline when a user complains
+- Support agents see full purchase + communication timeline per complaint
 
-This is the kind of cross-functional thinking — product + engineering + legal + finance — that senior PM/TPM roles hire for. The law degree helped me see the shape of it; the engineering let me actually build it.
+Cross-functional thinking — product + engineering + legal + finance — is what senior PM/TPM roles hire for. The law degree saw the shape; the engineering built it.
 
-## What this cost in engineering time
+## Engineering cost
 
-- `payment_consents` + `chargeback_cases` + `email_log` migrations: ~3 hours
-- Email template rewrite (8 templates, injected evidence rows): ~1 day
-- Refund-policy table refactor: ~half a day
+| Work | Time |
+|---|---|
+| Migrations for `payment_consents`, `chargeback_cases`, `email_log` | 3 hours |
+| Email template rewrite · 8 templates · injected evidence rows | 1 day |
+| Refund policy table refactor | 0.5 day |
+| **Total** | **~2 days** |
 
-Total: **~2 days of eng work**, protecting potentially the entire business.
+~2 engineering days protecting potentially the entire business.
 
-## What I'd do differently
+## Would change
 
-- **Instrument a "dispute dashboard" earlier.** Right now, the admin panel has chargeback cases visible, but I'd want per-product dispute rates, refund-rate trendlines, and alerting when a threshold is crossed. Next on the roadmap.
-- **Pre-dispute "save" flow.** When the amber callout gets clicked, route the user to a support conversation *before* they file a bank dispute. Early data from other SaaS products says this converts 30%+ of would-be chargebacks into refunds (cheaper) or resolutions (free).
+- **Dispute dashboard earlier.** Per-product dispute rates, refund-rate trends, threshold alerts. Next on roadmap.
+- **Pre-dispute "save" flow.** Amber callout → routed support chat *before* user files bank dispute. Industry data: 30%+ conversion from would-be chargebacks to refunds or resolutions.

@@ -1,35 +1,33 @@
-# 04 · Decision — Tiered AI Support Agents
+# 04 · Decision · Tiered AI Support Agents
 
 ## Context
 
-At v2.0.7, I shipped a multi-tier AI support system to handle inbound user questions without hiring a support rep. Requirements:
+v2.0.7 shipped a multi-tier AI support system — no hired rep. Requirements:
 
-- Answer common questions (billing, subscription, reading interpretation, account issues) fast and accurately
-- Escalate to a more capable model when the Tier-1 agent clearly isn't working
-- Never *sound* like the same bot twice — users who hit support multiple times shouldn't feel "here's that same AI again"
-- Never confirm or deny being a bot (it's a product design decision — warm support persona, not deceptive)
+- Fast, accurate answers on billing, subscription, reading interpretation, account
+- Escalate to a stronger model when Tier-1 stalls
+- Never sound like the same bot twice across sessions
+- Never confirm or deny being a bot — warm persona, not deceptive
 
-## The design
+## Design
 
-### Tier-1: six rotating agents
+### Tier-1 — six rotating agents
 
-Six distinct agent personas (Maya, Sofia, Priya, Zara, Leila, Cleo), each with:
-- A unique voice and persona card
-- Same underlying model (OpenAI GPT-4-class), different system prompts
-- Weekly rotation *per user*, via a **deterministic hash** of `(user_id, week_number)` → one of six agents
+Six personas (Maya, Sofia, Priya, Zara, Leila, Cleo). Each has:
+- Unique voice and persona card
+- Same underlying model (OpenAI GPT-4 class), different system prompts
+- **Weekly rotation per user** via deterministic hash of `(user_id, week_number)`
 
-The deterministic-hash approach means:
-- Same user gets the same agent all week (consistency within a session)
-- Different users get different agents at the same time (load/affinity distribution)
-- Week rolls over → new agent for the next week (freshness)
+Why deterministic hash:
+- Same user, same agent all week → session continuity
+- Different users, different agents concurrently → load distribution
+- Week rolls → new agent → freshness
 
-### Tier-2: escalation
+### Tier-2 — escalation
 
-One escalation agent, **Nadia**, runs on Anthropic Claude (different provider for redundancy + reasoning strength). Triggered when:
+**Nadia** on Anthropic Claude (different provider = redundancy + reasoning strength). Triggered after **3 pushback signals** in a session (negative sentiment, "this isn't helpful", repeated clarifications).
 
-- **3 pushback signals** from the user in the same session (negative sentiment, "this isn't helpful", repeated clarifications)
-
-Escalation is **in-place** — same chat thread, soft UI transition (`"Connecting you to a senior agent..."` indicator, 4.5-second handoff). Users don't lose context.
+In-place handoff: same thread, soft UI transition (`"Connecting to a senior agent..."`, 4.5s). Context preserved.
 
 ### Message routing flow
 
@@ -80,34 +78,34 @@ flowchart LR
     style C2 fill:#E0D4FF,color:#000
 ```
 
-Same user = same agent all week (session continuity). New week = freshness. Across users at any moment = load distribution.
+## Why this pattern
 
-## Why this structure (vs alternatives)
-
-| Alternative | Why I didn't pick it |
+| Alternative | Rejected because |
 |---|---|
-| **Single bot, always** | Feels samey; no escalation recourse; no "senior agent" trust signal |
-| **Random agent per session** | Breaks continuity mid-session |
-| **Human escalation only** | Not sustainable solo; would've blocked launch |
-| **Pure LLM routing (agent swarm)** | Over-engineered for v1 volume; hard to debug |
+| Single bot, always | Samey. No escalation recourse. No senior-agent trust signal. |
+| Random agent per session | Breaks continuity mid-session. |
+| Human escalation only | Not sustainable solo. Would have blocked launch. |
+| Pure LLM routing / agent swarm | Over-engineered for v1 volume. Hard to debug. |
 
-The weekly-rotation + triggered-escalation pattern is **deterministic, debuggable, and feels humane** — three things "agentic" systems typically aren't.
+Weekly rotation + triggered escalation is **deterministic, debuggable, humane** — three things agentic systems typically aren't.
 
-## Bugs I hit and fixed
+## Bug & fix · v2.0.7
 
-**The escalation persistence bug (v2.0.7).** Escalated sessions were reverting to Tier-1 after the next message — the `escalated_to_agent` column was being reset to null on every message write. Root cause: a stale default value in the message-insert path.
+Escalated sessions reverted to Tier-1 on the next message. Root cause: stale `escalated_to_agent` default on message insert.
 
-Fix shipped same day; backfilled affected sessions. Documented in the [CHANGELOG](https://github.com/omkarjaliparthi/insights-by-omkar) under v2.0.7. A TPM instinct: **this would've been caught in staging if I'd had a 2-message escalation smoke test**. I added that to the pre-launch checklist.
+Same-day fix. Affected sessions backfilled. CHANGELOG v2.0.7.
 
-## Design decisions with governance in mind
+**Preventive:** added a 2-message escalation smoke test to the pre-launch checklist. Would have caught it.
 
-- **"Are you a bot?" handling** — the agent sidesteps the question warmly without confirming or denying. This is deliberate and legally reviewed from my LLB training: we don't claim human status (that would be deceptive), but we don't volunteer a bot disclosure that breaks immersion. Terms of Service state AI is used.
-- **Chat transcripts logged** in `chat_messages` with full context — important for dispute defense if a user later claims "the bot told me X"
-- **Event messages** (`"Maya joined the chat"`, `"Connecting you to a senior agent..."`) are UI-only — filtered out of the OpenAI context so they don't pollute the model's reasoning
+## Governance built-in
 
-## What this demonstrates for a PM/TPM audience
+- **"Are you a bot?"** — sidestepped warmly. We don't claim human status (deceptive); we don't volunteer disclosure (breaks immersion). ToS discloses AI use. LLB-reviewed.
+- **Transcripts persist** in `chat_messages` — dispute defense if a user claims "the bot told me X"
+- **UI event messages** (`Maya joined the chat`, `Connecting to senior agent...`) are filtered out of the OpenAI context — no reasoning pollution
+
+## What this evidences
 
 - **Product judgment** — six rotating personas is a real design call, not a coin-flip
-- **System thinking** — deterministic hashing for distribution + consistency
-- **Operational discipline** — shipped the bug fix within the same release cycle + added a preventive test
-- **Governance awareness** — bot-disclosure, transcript logging, ToS alignment
+- **Systems thinking** — deterministic hashing for distribution + consistency
+- **Operational discipline** — same-release fix + preventive test
+- **Governance awareness** — bot disclosure, transcript logging, ToS alignment

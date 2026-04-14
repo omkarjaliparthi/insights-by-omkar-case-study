@@ -1,18 +1,18 @@
 # 06 · Operating Rhythm
 
-How this project actually got run — shipped in 6 weeks with TPM discipline, not vibes.
+Shipped in 6 weeks with TPM discipline, not vibes.
 
 ---
 
 ## Versioned release discipline
 
-20+ versioned releases between 2026-03-05 and 2026-04-14. Each release is:
+20+ releases between 2026-03-05 and 2026-04-14. Each is:
 
-1. **Scoped** — a short list of user-facing changes, never a grab-bag
+1. **Scoped** — short list of user-facing changes, never a grab-bag
 2. **Tested** on branch before merge
-3. **Documented** in `CHANGELOG.md` under the exact version tag
+3. **Documented** in `CHANGELOG.md` under the version tag
 4. **Tagged** in git
-5. **Announced** (internally to me, externally via changelog page at `/changelog`)
+5. **Announced** — internally + via `/changelog` page
 
 ### Version cadence
 
@@ -59,60 +59,60 @@ gantt
 
 ---
 
-## Pre-launch checklist (13 sections)
+## Pre-launch checklist · 13 sections
 
-Before v1.4.1 shipped, I ran a 13-section readiness checklist — the kind every FAANG launch program has, scaled down for a solo founder:
+Before v1.4.1 shipped — the same structure every FAANG launch program uses, sized for a solo founder:
 
-1. **Environment variables** across production, preview, development (40+ vars)
-2. **Stripe dashboard** — webhooks, prices, customer portal
-3. **PayPal dashboard** — webhooks, live mode
-4. **Supabase** — migrations, RLS, service-key scope, backups
-5. **Domain + DNS** — apex, www, SSL, MX
-6. **Resend email** — SPF, DKIM, DMARC, inbound routing
-7. **Vercel Cron** — 5 jobs enabled, `CRON_SECRET` set
-8. **Analytics + Search** — GA4, Search Console, sitemap, Bing, IndexNow
-9. **Monitoring** — Sentry, Vercel Speed Insights, uptime pings
-10. **Legal + content** — Privacy, Terms, Refund, cookie consent
-11. **Assets** — favicon, OG images, fallbacks
-12. **Pre-flight smoke tests** on production URL (signup → pay → reading → refund → cancel)
-13. **Day-of-launch** — live keys flip, robots.txt, announcement
+1. **Env vars** · 40+ across prod / preview / dev
+2. **Stripe** · webhooks, prices, customer portal
+3. **PayPal** · webhooks, live mode
+4. **Supabase** · migrations, RLS, service-key scope, backups
+5. **DNS** · apex, www, SSL, MX
+6. **Resend** · SPF, DKIM, DMARC, inbound routing
+7. **Vercel Crons** · 5 jobs + `CRON_SECRET`
+8. **Analytics + Search** · GA4, GSC, sitemap, Bing, IndexNow
+9. **Monitoring** · Sentry, Speed Insights, uptime
+10. **Legal** · Privacy, Terms, Refund, cookie consent
+11. **Assets** · favicon, OG images, fallbacks
+12. **Smoke tests on prod** · signup → pay → reading → refund → cancel
+13. **Day-of-launch** · key flip, robots.txt, announcement
 
-The full checklist lives in the private repo as `PRE_LAUNCH_CHECKLIST.md`. An anonymized template will land in the [TPM × PM Portfolio](https://github.com/omkarjaliparthi/tpm-portfolio).
+Full checklist lives in the private repo as `PRE_LAUNCH_CHECKLIST.md`. Anonymized template in the [TPM × PM Portfolio](https://github.com/omkarjaliparthi/tpm-portfolio).
 
 ---
 
-## Cron schedule as an ops artifact
+## Cron schedule as ops artifact
 
-See [02-architecture.md § Cron topology](./02-architecture.md#cron-topology) for the 5 jobs. Each is:
+See [§ Cron topology](./02-architecture.md#cron-topology) for the 5 jobs. Each is:
 
 - **Signed** — `CRON_SECRET` header check
 - **Idempotent** — safe to retry
-- **Observable** — errors hit Sentry, success/duration hits `observability` tables
+- **Observable** — errors to Sentry, success/duration to `observability` tables
 
-A cron job that fails silently is worse than no cron job. Each one has a watchdog.
+A cron that fails silently is worse than no cron. Each has a watchdog.
 
 ---
 
 ## Incident response
 
-I treat every production issue as a postmortem candidate. At this scale there's no formal severity scale — instead I use a two-question filter:
+Every production issue is a postmortem candidate. No formal severity scale at this scale. Two-question filter:
 
 1. Is a user *currently* unable to do something they paid for?
-2. Is there a revenue or compliance exposure?
+2. Is there revenue or compliance exposure?
 
-If yes to either → **stop what I'm doing, fix, post-mortem**. If no → queue, ship in next release.
+Either → stop, fix, post-mortem. Neither → queue for next release.
 
-**Two examples from the build:**
+**Examples:**
 
-- **Stripe webhook `.catch()` type error** (v2.0.7) — was blocking Vercel builds. No user impact, but blocking my ability to ship. Fixed in the same release cycle.
-- **Support agent escalation reverting to Tier-1** (v2.0.7) — user-facing bug, fixed same day. Added a 2-message escalation smoke test to the checklist to prevent recurrence.
+- **Stripe webhook `.catch()` type error (v2.0.7)** — blocked Vercel builds. Zero user impact, blocked my ability to ship. Fixed same cycle.
+- **Support agent escalation reverting to Tier-1 (v2.0.7)** — user-facing, fixed same day. Added 2-message escalation smoke test to the checklist.
 
 ---
 
 ## Operating tooling
 
-- **Jira-equivalent for solo dev:** a flat changelog + a running decisions doc. No PM overhead for a team of 1.
-- **AI-native context:** `update-ai-context.sh` + `repomix-output.xml` — I keep a distilled codebase context up-to-date so AI coding tools can reason over the full system. This is a TPM practice translated for the AI era: **keep the "program state" compressed and queryable**.
+- **Jira equivalent for solo** — a flat changelog + running decisions doc. Zero PM overhead for team of 1.
+- **AI-native context** — `update-ai-context.sh` + `repomix-output.xml` keep a distilled codebase context up-to-date for AI coding tools. **Keep program state compressed and queryable.**
 
 ---
 
@@ -120,7 +120,7 @@ If yes to either → **stop what I'm doing, fix, post-mortem**. If no → queue,
 
 - 20+ shippable releases in 6 weeks
 - Zero accidental production outages
-- Clean audit trail for every user-visible change
-- Compliance-ready posture (RLS, DMARC, consent, policy-stamped receipts) from day 1
+- Clean audit trail per user-visible change
+- Compliance-ready posture from day 1 — RLS, DMARC, consent, policy-stamped receipts
 
-**The rhythm is the moat.** Anyone can build a feature. Fewer people ship 20 features in 6 weeks without breaking production.
+**The rhythm is the moat.** Anyone can build a feature. Few ship 20 features in 6 weeks without breaking production.

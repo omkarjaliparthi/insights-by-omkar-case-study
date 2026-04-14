@@ -141,23 +141,23 @@ erDiagram
 
 ## Cron topology
 
-5 scheduled jobs run the content + ops engine:
+5 scheduled jobs drive the content + ops engine:
 
 | Schedule | Job | Purpose |
 |---|---|---|
-| Daily 06:00 UTC | `/api/cron/content-generate` | Generate next day's content (blog, rituals, daily card) |
-| Daily 14:00 UTC | `/api/cron/content-publish` | Publish approved content, ping IndexNow, update sitemap |
-| Weekly Mon 08:00 UTC | `/api/cron/intelligence` | Aggregate content intelligence, brainstorms, roadmap signals |
-| Monthly 15th 10:00 UTC | `/api/cron/monthly-report` | Email monthly business report to admin |
-| Daily 15:00 UTC | `/api/cron/re-engagement` | Re-engagement flows for dormant users |
+| Daily 06:00 UTC | `content-generate` | Generate next-day content (blog, rituals, daily card) |
+| Daily 14:00 UTC | `content-publish` | Publish approved content, ping IndexNow, update sitemap |
+| Mon 08:00 UTC | `intelligence` | Aggregate signals, brainstorms, roadmap |
+| 15th 10:00 UTC | `monthly-report` | Email business report |
+| Daily 15:00 UTC | `re-engagement` | Dormant-user flows |
 
-Each is secured by a `CRON_SECRET` header check — Vercel Cron sends it, routes reject anything else. This pattern matters: **scheduled jobs are an attack surface if not signed**.
+Each signed with `CRON_SECRET`. Routes reject anything else. **Scheduled jobs are an attack surface if not signed.**
 
 ---
 
 ## AI provider strategy
 
-Two providers wired in parallel — **OpenAI** and **Anthropic** — with per-module model env vars:
+Two providers in parallel — OpenAI + Anthropic — with per-module model env vars:
 
 ```
 OPENAI_TAROT_MODEL
@@ -165,31 +165,31 @@ OPENAI_SPELL_MODEL
 OPENAI_RUNE_MODEL
 OPENAI_DREAM_MODEL
 OPENAI_NUMEROLOGY_MODEL
-ANTHROPIC_API_KEY            (Claude for support agents + escalation reasoning)
+ANTHROPIC_API_KEY   (Claude for support + escalation reasoning)
 ```
 
-**Why both?** Three reasons:
+Why both:
 
-1. **Redundancy.** If one provider has an outage or rate-limits, the product keeps working.
-2. **Per-module model selection.** Claude is better for nuanced support; GPT-4 class is better for some structured outputs. Model swaps are env-var changes, not code changes.
-3. **Cost control.** Swap to cheaper models on low-margin modules without a code deploy.
+1. **Redundancy** — one outage or rate-limit doesn't stop the product
+2. **Per-module selection** — Claude is better for nuanced support, GPT-4 class for some structured outputs. Swaps are env changes, not code.
+3. **Cost control** — cheaper models on low-margin modules, no deploy
 
 ---
 
 ## Rendering & performance
 
-- **App Router + RSC** — most pages are server-rendered; client hydration is scoped to interactive components
+- **App Router + RSC** — server-rendered by default, client hydration scoped to interactive components
 - **Turbopack** in dev
-- **OG image auto-generation** per reading for shareable artifacts (every tarot reading has a unique Open Graph card)
-- **Reduced-motion fallback** — 3D (`@react-three/*`, `gsap`) chambers gracefully degrade to static gradient backgrounds when OS reduced-motion is enabled
+- **Auto-generated OG images** — every reading has a unique Open Graph card
+- **Reduced-motion fallback** — 3D chambers degrade to static gradients when OS reduced-motion is on
 
 ---
 
-## What's *not* in the architecture
+## Not in the architecture
 
-Decisions I explicitly didn't make yet, with reasoning in [07-outcomes-and-lessons.md](./07-outcomes-and-lessons.md):
+Explicit non-choices, with reasoning in [07-outcomes-and-lessons.md](./07-outcomes-and-lessons.md):
 
-- No microservices (monolith is right for this scale)
-- No custom fine-tuned models (API-first)
-- No native mobile (PWA-first)
-- No event bus / queue (cron jobs + webhook handlers are sufficient for current volume)
+- No microservices — monolith is right at this scale
+- No custom fine-tuned models — API-first
+- No native mobile — PWA-first
+- No event bus — crons + webhooks are sufficient for current volume
