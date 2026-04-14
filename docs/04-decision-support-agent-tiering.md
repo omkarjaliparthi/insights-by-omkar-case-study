@@ -31,6 +31,57 @@ One escalation agent, **Nadia**, runs on Anthropic Claude (different provider fo
 
 Escalation is **in-place** — same chat thread, soft UI transition (`"Connecting you to a senior agent..."` indicator, 4.5-second handoff). Users don't lose context.
 
+### Message routing flow
+
+```mermaid
+flowchart TD
+    Msg([User sends message]) --> SessionLoad["Load session state<br/>(escalated_to_agent)"]
+    SessionLoad --> EscCheck{Already<br/>escalated?}
+    EscCheck -- Yes --> Nadia["Route → Nadia (Tier-2)<br/>Anthropic Claude"]
+    EscCheck -- No --> PushbackCount["Count pushback signals<br/>in this session"]
+    PushbackCount --> ShouldEsc{Pushback<br/>count ≥ 3?}
+    ShouldEsc -- Yes --> EscEvent["Emit escalation event<br/>UI: 'Connecting to senior agent...'"]
+    EscEvent --> Persist["Persist escalated_to_agent<br/>on session AND every future message"]
+    Persist --> Nadia
+    ShouldEsc -- No --> Hash["Deterministic hash<br/>(user_id, week)"]
+    Hash --> Pick["Pick Tier-1 agent<br/>(Maya / Sofia / Priya /<br/>Zara / Leila / Cleo)"]
+    Pick --> Tier1["Route → Selected Tier-1<br/>OpenAI GPT-4 class"]
+    Tier1 --> Reply([Response + log to chat_messages])
+    Nadia --> Reply
+
+    style Nadia fill:#D9770640,stroke:#D97706,stroke-width:2px,color:#F5F0E6
+    style Tier1 fill:#41299140,stroke:#412991,stroke-width:2px,color:#F5F0E6
+    style EscEvent fill:#FF444430,stroke:#FF4444,color:#F5F0E6
+```
+
+### Weekly rotation across users
+
+```mermaid
+flowchart LR
+    subgraph Week1["Week 1"]
+        U1a[User A] --> M1[Maya]
+        U2a[User B] --> S1[Sofia]
+        U3a[User C] --> P1[Priya]
+    end
+
+    subgraph Week2["Week 2"]
+        U1b[User A] --> Z2[Zara]
+        U2b[User B] --> L2[Leila]
+        U3b[User C] --> C2[Cleo]
+    end
+
+    Week1 -.->|hash(user_id, week)| Week2
+
+    style M1 fill:#41299130,color:#F5F0E6
+    style S1 fill:#41299130,color:#F5F0E6
+    style P1 fill:#41299130,color:#F5F0E6
+    style Z2 fill:#6E56CF30,color:#F5F0E6
+    style L2 fill:#6E56CF30,color:#F5F0E6
+    style C2 fill:#6E56CF30,color:#F5F0E6
+```
+
+Same user = same agent all week (session continuity). New week = freshness. Across users at any moment = load distribution.
+
 ## Why this structure (vs alternatives)
 
 | Alternative | Why I didn't pick it |

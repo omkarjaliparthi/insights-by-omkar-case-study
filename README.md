@@ -51,6 +51,7 @@ I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** 
 5. **[Decision: chargeback defense](./docs/05-decision-chargeback-defense.md)** — how the law degree showed up
 6. **[Operating rhythm](./docs/06-operating-rhythm.md)** — release discipline, pre-launch checklist, cron schedules
 7. **[Outcomes & lessons](./docs/07-outcomes-and-lessons.md)** — what worked, what I'd do differently
+8. **[User flows](./docs/08-user-flows.md)** — signup, support escalation, refund/chargeback recovery, content publishing (with diagrams)
 
 ---
 

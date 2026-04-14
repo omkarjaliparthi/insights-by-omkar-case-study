@@ -27,6 +27,36 @@ How this project actually got run — shipped in 6 weeks with TPM discipline, no
 
 **Each version is a TPM artifact.** You can point at any one and trace the scope, the risk, the rollback plan.
 
+### 6-week release timeline
+
+```mermaid
+gantt
+    title Insights by Omkar · 6-Week Ship
+    dateFormat YYYY-MM-DD
+    axisFormat %b %d
+
+    section Foundation
+    Scaffold (v0.01)                 :done, 2026-03-05, 2d
+    Auth + DB + Dashboard (v1.0)     :done, 2026-03-07, 3d
+    Appointments + Stripe (v1.2)     :done, 2026-03-10, 6d
+
+    section Product expansion
+    Payments + Admin + Tarot (v1.3)  :done, 2026-03-16, 4d
+    Production polish (v1.4)         :done, 2026-03-20, 2d
+    Design + Mobile (v1.5)           :done, 2026-03-22, 3d
+
+    section Launch hardening
+    PayPal + Webhooks (v2.0)         :done, 2026-03-25, 1d
+    Analytics (v2.0.5)               :done, 2026-03-26, 12d
+    Support Agents (v2.0.7)          :done, 2026-04-07, 1d
+    Chargeback + Email (v2.0.7)     :done, 2026-04-07, 7d
+
+    section Ops milestones
+    Pre-launch checklist run         :milestone, m1, 2026-03-20, 0d
+    Go-live                          :milestone, m2, 2026-03-25, 0d
+    Support system live              :milestone, m3, 2026-04-07, 0d
+```
+
 ---
 
 ## Pre-launch checklist (13 sections)

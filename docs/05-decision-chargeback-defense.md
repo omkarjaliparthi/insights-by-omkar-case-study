@@ -37,6 +37,42 @@ Two tables — `credit_package_refund_policies` and `appointment_type_refund_pol
 - Admin panel lets me set cancellation windows, refund percentages, and fees per product
 - The same policy rendered to the user at checkout is what's enforced by the webhook handler
 
+### Evidence chain — from purchase to dispute win
+
+```mermaid
+flowchart LR
+    subgraph Purchase["🛒 At purchase"]
+        P1[User views pricing page] --> P2[Policy shown inline]
+        P2 --> P3[User clicks 'Pay']
+        P3 --> P4[(payment_consents<br/>IP · UA · policy version · timestamp)]
+    end
+
+    subgraph Receipt["📧 At receipt"]
+        R1[Stripe/PayPal webhook fires] --> R2[Receipt email sent]
+        R2 --> R3[Auto-inject:<br/>• 'Charged on [timestamp]'<br/>• Policy row<br/>• Support callout]
+        R3 --> R4[(email_log<br/>full HTML snapshot)]
+    end
+
+    subgraph Dispute["⚖️ If dispute filed"]
+        D1[Processor dispute webhook] --> D2[Create chargeback_case]
+        D2 --> D3[Bundle evidence:<br/>consent row + email snapshot +<br/>support transcript + reading record]
+        D3 --> D4[Submit to processor<br/>within 7 days]
+        D4 --> D5{Outcome}
+        D5 -->|~60%+ wins| Won([Dispute won])
+        D5 -->|~40% lost| Lost([Dispute lost])
+    end
+
+    P4 -.-> D3
+    R4 -.-> D3
+
+    style Won fill:#3FCF8E40,stroke:#3FCF8E,color:#F5F0E6
+    style Lost fill:#FF444430,stroke:#FF4444,color:#F5F0E6
+    style P4 fill:#6E56CF20,stroke:#6E56CF,color:#F5F0E6
+    style R4 fill:#C8A96920,stroke:#C8A969,color:#F5F0E6
+```
+
+The key insight: **evidence must exist at the moment of purchase**, not assembled after a dispute opens. Every link in this chain is built to be an evidentiary artifact.
+
 ## Why this matters for a PM/TPM audience
 
 Most consumer AI founders treat chargeback defense as an *operational* problem — something you deal with when the first dispute comes in. By then, it's too late: the evidence you needed didn't exist.

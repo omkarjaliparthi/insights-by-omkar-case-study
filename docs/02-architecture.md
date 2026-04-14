@@ -2,30 +2,75 @@
 
 ## System overview
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│                          Browser / Client                          │
-│              (Next.js 16 App Router · React 19 · TS)               │
-└────────────┬──────────────────────────────────┬────────────────────┘
-             │                                  │
-     ┌───────▼────────┐                  ┌──────▼──────┐
-     │ Server Actions │                  │  API Routes │
-     │  + RSC         │                  │  (Node)     │
-     └───────┬────────┘                  └──────┬──────┘
-             │                                  │
-   ┌─────────┴──────────────┬──────────────────┴───┬──────────────┐
-   │                        │                      │              │
-┌──▼──────────────┐ ┌───────▼────────┐ ┌───────────▼─────────┐ ┌──▼──────┐
-│    Supabase     │ │   AI routing   │ │    Payment rails    │ │  Email  │
-│ Auth · DB · RLS │ │ OpenAI+Anthropic│ │  Stripe + PayPal    │ │ Resend  │
-│  Storage · Edge │ │ per-module cfg │ │  webhooks reconciled│ │ SPF/DKIM│
-└─────────────────┘ └────────────────┘ └─────────────────────┘ └─────────┘
+```mermaid
+flowchart TB
+    User([User / Browser])
 
-             ┌─────────────────────────────────────────────┐
-             │              Ops & observability            │
-             │ Sentry · Vercel Analytics · GA4 · GSC/IndexNow │
-             │ 5× Vercel Cron jobs · Uptime pings           │
-             └─────────────────────────────────────────────┘
+    subgraph Client["Client Layer"]
+        direction LR
+        Next["Next.js 16 App Router<br/>React 19 · TypeScript · Tailwind"]
+    end
+
+    subgraph Server["Server Layer (Vercel Edge + Node)"]
+        direction LR
+        RSC["Server Components<br/>+ Server Actions"]
+        API["API Routes<br/>(webhooks, crons, admin)"]
+    end
+
+    subgraph Data["Data & Identity"]
+        SB[("Supabase<br/>Auth · Postgres · Storage<br/>Row-Level Security")]
+    end
+
+    subgraph AI["AI Orchestration"]
+        OAI["OpenAI<br/>(per-module models)"]
+        ANT["Anthropic Claude<br/>(Tier-2 support)"]
+    end
+
+    subgraph Pay["Payment Rails"]
+        ST["Stripe<br/>Subscriptions + Credits"]
+        PP["PayPal<br/>Subscriptions + Orders"]
+    end
+
+    subgraph Comm["Email & Comms"]
+        RS["Resend<br/>SPF · DKIM · DMARC<br/>Inbound routing"]
+    end
+
+    subgraph Ops["Ops & Observability"]
+        direction LR
+        CRN["5× Vercel Crons<br/>content · intelligence<br/>reports · re-engagement"]
+        SEN["Sentry · GA4<br/>GSC · IndexNow"]
+    end
+
+    User <--> Next
+    Next <--> RSC
+    Next <--> API
+    RSC --> SB
+    API --> SB
+    API --> OAI
+    API --> ANT
+    API --> ST
+    API --> PP
+    API --> RS
+    ST -. webhooks .-> API
+    PP -. webhooks .-> API
+    CRN --> API
+    API --> SEN
+
+    classDef client fill:#6E56CF20,stroke:#6E56CF,color:#F5F0E6
+    classDef server fill:#C8A96920,stroke:#C8A969,color:#F5F0E6
+    classDef data fill:#3FCF8E20,stroke:#3FCF8E,color:#F5F0E6
+    classDef ai fill:#41299120,stroke:#412991,color:#F5F0E6
+    classDef pay fill:#635BFF20,stroke:#635BFF,color:#F5F0E6
+    classDef comm fill:#FFCB1F20,stroke:#FFCB1F,color:#F5F0E6
+    classDef ops fill:#FF444420,stroke:#FF4444,color:#F5F0E6
+
+    class Next client
+    class RSC,API server
+    class SB data
+    class OAI,ANT ai
+    class ST,PP pay
+    class RS comm
+    class CRN,SEN ops
 ```
 
 ---
@@ -45,6 +90,78 @@
 | **Governance** | Row-Level Security on every user-scoped table | Service role gated to server-side only |
 
 **Every user-scoped table has RLS.** The service-role key never touches the client bundle.
+
+### Data model — ER diagram (simplified)
+
+```mermaid
+erDiagram
+    PROFILES ||--o{ SUBSCRIPTIONS : has
+    PROFILES ||--o{ TAROT_READINGS : creates
+    PROFILES ||--o{ DREAM_JOURNAL : writes
+    PROFILES ||--o{ RUNE_CASTS : casts
+    PROFILES ||--o{ CHAT_SESSIONS : starts
+    PROFILES ||--o{ PAYMENT_CONSENTS : grants
+    PROFILES ||--o{ CHARGEBACK_CASES : "may trigger"
+    PROFILES ||--o{ EMAIL_LOG : receives
+
+    CHAT_SESSIONS ||--o{ CHAT_MESSAGES : contains
+    CHAT_SESSIONS }o--|| SUPPORT_AGENTS : "assigned (T1 or T2)"
+
+    SUBSCRIPTIONS }o--|| STRIPE_OR_PAYPAL : "provider"
+    PAYMENT_CONSENTS }o--|| REFUND_POLICIES : "stamped with"
+    CHARGEBACK_CASES ||--|| EMAIL_LOG : "evidence from"
+
+    PROFILES {
+        uuid id PK
+        text email
+        text display_name
+        jsonb preferences
+        timestamp created_at
+    }
+    SUBSCRIPTIONS {
+        uuid id PK
+        uuid user_id FK
+        text provider
+        text provider_subscription_id
+        text state
+        timestamp current_period_end
+    }
+    PAYMENT_CONSENTS {
+        uuid id PK
+        uuid user_id FK
+        text policy_version
+        text ip
+        text user_agent
+        timestamp consented_at
+    }
+    CHARGEBACK_CASES {
+        uuid id PK
+        uuid user_id FK
+        text provider_dispute_id
+        text status
+        jsonb evidence_bundle
+        text resolution
+    }
+    EMAIL_LOG {
+        uuid id PK
+        uuid user_id FK
+        text template
+        text html_snapshot
+        timestamp sent_at
+    }
+    CHAT_SESSIONS {
+        uuid id PK
+        uuid user_id FK
+        text escalated_to_agent
+        timestamp started_at
+    }
+    SUPPORT_AGENTS {
+        uuid id PK
+        text tier
+        text persona
+        text provider
+    }
+```
 
 ---
 
