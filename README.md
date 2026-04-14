@@ -20,7 +20,7 @@
 
 ## TL;DR
 
-I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** — a production AI SaaS platform — in **~6 weeks, solo**. End-to-end: product strategy, UX, full-stack engineering, payments, AI integration, email infrastructure, support operations, compliance, and launch.
+I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** — a production AI SaaS platform — in **~6 weeks, solo**, under my LLC (**Omkar's Holistic Services LLC**, formed May 2023, DBA *Insights by Omkar*). End-to-end: product strategy, UX, full-stack engineering, payments, AI integration, email infrastructure, support operations, compliance, and launch.
 
 **Why it matters for a PM/TPM role:** most candidates can talk about one layer of a product. This project is evidence I can own *all* of them — and that I know which layer to invest in based on business stage and risk.
 
@@ -107,7 +107,7 @@ I built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** 
 
 ## Who I am
 
-**Omkar Jaliparthi** — 8+ years across Project/Program Management, Business Analysis, and full-stack shipping. MS CS (Pace University, 2024), LLB (2021), ICWA Intermediate (2020). Based in San Jose, CA. Open to Senior PM, TPM, and Founding PM roles.
+**Omkar Jaliparthi** — 8+ years across Project/Program Management, Business Analysis, and full-stack shipping. Founder of **Omkar's Holistic Services LLC** (DBA *Insights by Omkar*) since May 2023. MS CS (Pace University, 2024), LLB (2021), ICWA Intermediate (2020). Based in San Jose, CA. Open to Senior PM, TPM, and Founding PM roles.
 
 <p>
   <a href="https://github.com/omkarjaliparthi">GitHub</a> ·
