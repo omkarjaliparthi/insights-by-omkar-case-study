@@ -176,6 +176,91 @@ Why both:
 
 ---
 
+## AI content pipeline · two-stage governance
+
+Every piece of AI-generated content passes two sequential gates before publishing. Low-quality content never reaches the strategy layer; off-strategy content never reaches users.
+
+### Stage 1 · Content Forge (quality gate)
+
+| Layer | Metaphor | Model | Role |
+|---|---|---|---|
+| Chandra | Moon | Claude Sonnet | Creates content + self-scores with evidence |
+| Surya | Sun | GPT-4o | **Blind** audit — never sees Chandra's score |
+
+Both must pass. Low-quality content is **destroyed and regenerated** up to `max_generation_cycles`.
+
+### Stage 2 · Intelligence Triad (strategy gate)
+
+| Layer | Metaphor | Model | Role |
+|---|---|---|---|
+| Brahma | Creator | Claude Sonnet | SEO enrichment, hashtag strategy, CTAs, discoverability |
+| Vishnu | Preserver | GPT-4o | Validates against real performance data + user search + chatbot signals |
+| Shiva | Transformer | **Claude + GPT-4o dual consensus** | Strategic final gate — **both must agree** or auto-flag |
+
+Every layer emits: `verdict · score · evidence · risk level (1-5) · confidence (0-1.0)`. Every decision auditable.
+
+```mermaid
+flowchart LR
+    Input([Content brief]) --> Chandra[Chandra<br>Claude Sonnet<br>create + self-score]
+    Chandra --> Surya[Surya<br>GPT-4o<br>blind review]
+    Surya --> Q1{Both pass?}
+    Q1 -- No --> Regen[Destroy + regenerate]
+    Regen --> Chandra
+    Q1 -- Yes --> Brahma[Brahma<br>Claude Sonnet<br>SEO enrichment]
+    Brahma --> Vishnu[Vishnu<br>GPT-4o<br>data validation]
+    Vishnu --> Shiva[Shiva · dual consensus<br>Claude + GPT-4o]
+    Shiva --> Q2{Both models agree?}
+    Q2 -- No --> Flag[Auto-flag for admin review]
+    Q2 -- Yes --> Publish([Publish])
+
+    style Regen fill:#FF8888,color:#000
+    style Flag fill:#FFB366,color:#000
+    style Publish fill:#3FCF8E,color:#000
+```
+
+Additional intelligence systems:
+
+- **Vertical Readiness** — dual-model consensus scores each vertical 0-100 on 5 dimensions, emits launch / hold / needs-work
+- **Tier-1 Weekly + Tier-2 Monthly recommendations** — GPT-4o analyzes performance data, emits narrative + timing/hashtag/style weight adjustments
+- **Cross-session memory synthesis** — volume-triggered (3 → every 5, 24h floor) — synthesizes user narrative + ongoing themes + active situations + voice preferences from chamber history
+
+All recommendations route through `require_intelligence_approval` toggle. Three-phase rollout: Phase 1 (both approvals ON), Phase 2 (intelligence auto-applies), Phase 3 (both auto) — governance ramp encoded as a setting, not a meeting.
+
+---
+
+## Shared chamber runner · atomic credits
+
+Every paid AI chamber (spell-create, spell-refine, dream-journal, rune-cast, numerology) runs through `lib/chambers/run-chamber.ts`. Handles the transactional edge cases most indie apps ignore:
+
+1. **Atomic credit consumption** via `consume_credits` RPC under a row lock (daily-first-then-purchased split in one transaction)
+2. **Automatic refund** via `refund_credits` if the generator or persist step fails
+3. **Stable ledger reasons** — admin panels group on `chamber.spell-create`, `chamber.dream-journal`, etc.
+
+New chambers MUST go through this runner. Tarot home still uses an inline path pending migration.
+
+---
+
+## Admin platform · 33 panels
+
+```
+analytics · announcements · appointment-types · appointments · availability
+blocked-dates · blog · bookings · chambers · chargeback-defense · content
+content-intelligence · credits · daily-credits · email-log · email-preview
+impulse-pricing · intelligence-layers · observability · payments · project
+revenue · seo · social-settings · spells · support · support-agent · team
+testimonials · user-activity · verticals
+```
+
+Notable pieces:
+
+- **`/admin/observability`** — error_log with severity tiers (fatal / error / warning / info / debug), 24h + 7d views, commit SHA tagging
+- **`/admin/payments`** — stuck-payment detector (`paid` but no ledger row > 10 min), full payment-attempt lifecycle
+- **`/admin/intelligence-layers`** — live Brahma/Vishnu/Shiva verdicts + scores + flagged-issues log
+- **`/admin/content-intelligence`** — Tier-1/Tier-2 recommendations with narrative + apply/reject workflow
+- **`/admin/project`** — living decision log: `project_plans`, `project_decisions` (`data_before`/`data_after`), `cron_log`, `spell_search_log`
+
+---
+
 ## Rendering & performance
 
 - **App Router + RSC** — server-rendered by default, client hydration scoped to interactive components

@@ -26,19 +26,21 @@ Most PM/TPM candidates own one layer. This project evidences all four — and th
 
 ---
 
-## At a glance
+## At a glance *(current: v2.2.0 — Phase 0 launch)*
 
 | | |
 |---|---|
-| **Product** | AI consumer SaaS · 12+ modules (tarot, spells, runes, dreams, numerology, …) |
-| **Timeline** | v0.01 → v2.0.7 · 6 weeks · 2026-03-05 → 2026-04-14 |
+| **Product** | AI consumer SaaS · 13 indexed content traditions · 5 paid AI chambers (tarot, custom spell, dream journal, rune cast, numerology) |
+| **Surface** | **1,200+ library entries** · 37 DB migrations · 33 admin panels · 100+ JSON-LD-enriched pages |
+| **Timeline** | v0.01 → v2.2.0 · ~6 weeks core ship + post-launch hardening · 2026-03-05 → ongoing |
 | **Releases** | 20+ versioned · full [CHANGELOG](https://github.com/omkarjaliparthi/insights-by-omkar) |
 | **Stack** | Next.js 16 · React 19 · Supabase · TypeScript · Tailwind · Vercel |
-| **Payments** | Stripe + PayPal (both live) · 4 subscription tiers + credit packs |
-| **AI** | OpenAI + Anthropic · per-module models · structured outputs |
-| **Ops** | 5 Vercel crons · Resend (SPF/DKIM/DMARC) · Sentry · GSC · IndexNow |
-| **Compliance** | RLS · consent logging · chargeback defense · enforced refund policy |
-| **Surface** | 30+ DB migrations · 20+ admin panels · 12+ product modules |
+| **Payments** | Stripe (credits + subs, dual webhook endpoints) + PayPal (credits, CAPTURE intent) · Lucky Pro + Lucky Max tiers, M/A billing · Customer Portal |
+| **AI · content** | **Content Forge** (Chandra + Surya — blind dual review) → **Intelligence Triad** (Brahma + Vishnu + Shiva dual consensus) — every decision carries evidence, risk level 1-5, confidence 0-1.0 |
+| **AI · product** | Shared chamber runner · atomic credit consumption via Postgres RPC row-lock + automatic refund on failure · cross-session memory synthesis |
+| **Ops** | 5 Vercel crons · Resend (SPF/DKIM/DMARC) · in-house `error_log` + optional Sentry · `/admin/observability` severity stream · `/admin/payments` stuck-payment detector |
+| **Compliance** | RLS on every user-scoped table · 4-category GDPR cookie banner · consent logging · chargeback defense · enforced refund policy · E-E-A-T signals (Person schema, bylines) |
+| **SEO** | 15-group sitemap · thin-vertical quarantine (robots:noindex <20-entry) · bidirectional cross-link graph · JSON-LD (Organization, Person, WebSite, BreadcrumbList, Article, HowTo, Product, Service, FAQPage, CollectionPage, TechArticle) · GSC + Bing + IndexNow |
 
 ---
 
@@ -52,6 +54,7 @@ Most PM/TPM candidates own one layer. This project evidences all four — and th
 6. **[Operating rhythm](./docs/06-operating-rhythm.md)** — releases, checklists, crons
 7. **[Outcomes & lessons](./docs/07-outcomes-and-lessons.md)** — what worked, what to change
 8. **[User flows](./docs/08-user-flows.md)** — signup, support escalation, refund/chargeback, content automation
+9. **[Decision log](./docs/09-decision-log.md)** — 5 strategic plans surfaced from the program archive (batch rollout, performance audit, status audit, paid features, approval workflow)
 
 ---
 
