@@ -1,5 +1,9 @@
 # 02 · Architecture
 
+<p align="center">
+  <img src="../assets/architecture.png" alt="Insights by Omkar — System Architecture (v2.2.0)" width="100%" />
+</p>
+
 ## System overview
 
 ```mermaid

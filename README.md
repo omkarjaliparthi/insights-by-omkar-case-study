@@ -1,8 +1,5 @@
-<h1 align="center">Insights by Omkar · Case Study</h1>
-
 <p align="center">
-  <b>A production AI SaaS — shipped solo, in 6 weeks.</b><br/>
-  <i>Product, program, engineering, compliance — end to end.</i>
+  <img src="./assets/hero.png" alt="Insights by Omkar — Case Study · v2.2.0 Phase 0 Launch · solo-shipped AI SaaS in 6 weeks" width="100%" />
 </p>
 
 <p align="center">
@@ -23,6 +20,12 @@
 Built and launched **[insightsbyomkar.com](https://www.insightsbyomkar.com)** — a production AI SaaS — in **6 weeks, solo**, under **Omkar's Holistic Services LLC** (formed May 2023, DBA *Insights by Omkar*). End to end: product, UX, full-stack engineering, payments, AI, email, support, compliance, launch.
 
 Most PM/TPM candidates own one layer. This project evidences all four — and the judgment to know which layer to invest in at each stage.
+
+---
+
+<p align="center">
+  <img src="./assets/metrics.png" alt="By the numbers — $1.2M+ portfolio · 92% on-time · 58% faster MTTR · 95%+ SLA · 30% fewer defects · 6-week solo ship" width="100%" />
+</p>
 
 ---
 
