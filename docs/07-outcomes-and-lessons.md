@@ -83,7 +83,7 @@ This repo is a capability proof. The fits from here:
 
 Not looking for "a PM role." Looking for a role where operator, builder, and governance-thinker all get used.
 
-If that's your org — **[let's talk](mailto:Jaliparthiomkar03@gmail.com)**.
+If that's your org — **[let's talk](mailto:admin@insightsbyomkar.com)**.
 
 ---
 
