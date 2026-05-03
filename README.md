@@ -124,6 +124,6 @@ MS CS · LLB · ICWA Intermediate · San Jose, CA · Open to Senior PM / TPM / F
 <p>
   <a href="https://github.com/omkarjaliparthi">GitHub</a> ·
   <a href="https://www.linkedin.com/in/jaliparthiomkar">LinkedIn</a> ·
-  <a href="mailto:Jaliparthiomkar03@gmail.com">Email</a> ·
+  <a href="mailto:admin@insightsbyomkar.com">Email</a> ·
   <a href="https://www.insightsbyomkar.com">Live product</a>
 </p>
