@@ -42,7 +42,7 @@ Most PM/TPM candidates own one layer. This project evidences all four — and th
 | **Releases** | 40+ versioned · full [CHANGELOG](https://github.com/omkarjaliparthi/insights-by-omkar) |
 | **Stack** | Next.js 16 · React 19 · Supabase · TypeScript · Tailwind · Vercel |
 | **Payments** | Stripe (credits + subs, dual webhook endpoints) + PayPal (credits, CAPTURE intent) · Lucky Pro + Lucky Max tiers, M/A billing · Customer Portal |
-| **AI · content** | **Content Forge** (Chandra + Surya — blind dual review) → **Intelligence Triad** (Brahma + Vishnu + Shiva dual consensus) — every decision carries evidence, risk level 1-5, confidence 0-1.0 |
+| **AI · evaluation pipeline** | Two-stage online evaluation: **Content Forge** (Chandra + Surya — blind dual-review on quality dimensions) → **Intelligence Triad** (Brahma + Vishnu + Shiva — three-model strategic consensus) — every decision passes through with evidence, risk level 1-5, confidence 0-1.0 |
 | **AI · product** | Shared chamber runner · atomic credit consumption via Postgres RPC row-lock + automatic refund on failure · cross-session memory synthesis |
 | **Ops** | 5 Vercel crons · Resend (SPF/DKIM/DMARC) · in-house `error_log` + optional Sentry · `/admin/observability` severity stream · `/admin/payments` stuck-payment detector |
 | **Compliance** | RLS on every user-scoped table · 4-category GDPR cookie banner · consent logging · chargeback defense · enforced refund policy · E-E-A-T signals (Person schema, bylines) |
