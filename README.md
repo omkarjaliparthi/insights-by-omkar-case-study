@@ -117,9 +117,9 @@ Most PM/TPM candidates own one layer. This project evidences all four — and th
 
 ## Who I am
 
-**Omkar Jaliparthi** · Product & Program leader · 8+ years across PM, BA, and full-stack shipping.
+**Omkar Jaliparthi** · AI Platform PM and Founding-team Builder · 8+ years across PM, BA, and full-stack shipping.
 Founder of **Omkar's Holistic Services LLC** (DBA *Insights by Omkar*) since May 2023.
-MS CS · LLB · ICWA Intermediate · San Jose, CA · Open to Senior PM / TPM / Founding PM.
+MS CS · LLB · ICWA Intermediate · San Jose, CA · US work-authorized · Open to Founding PM / Senior PM / AI Platform PM / Senior TPM.
 
 <p>
   <a href="https://github.com/omkarjaliparthi">GitHub</a> ·
